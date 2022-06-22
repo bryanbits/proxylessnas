@@ -30,7 +30,7 @@ ref_values = {
         '1.00': 300 * 1e6,
         '1.30': 509 * 1e6,
         '1.40': 582 * 1e6,
-    },,
+    }
 }
 
 parser = argparse.ArgumentParser()
