@@ -22,7 +22,7 @@ class RunConfig:
     def __init__(self, n_epochs, init_lr, lr_schedule_type, lr_schedule_param,
                  dataset, train_batch_size, test_batch_size, valid_size,
                  opt_type, opt_param, weight_decay, label_smoothing, no_decay_keys,
-                 model_init, init_div_groups, validation_frequency, print_frequency):
+                 model_init, init_div_groups, validation_frequency, print_frequency, path=None):
         self.n_epochs = n_epochs
         self.init_lr = init_lr
         self.lr_schedule_type = lr_schedule_type
@@ -46,6 +46,7 @@ class RunConfig:
 
         self._data_provider = None
         self._train_iter, self._valid_iter, self._test_iter = None, None, None
+        self.path = path
 
     @property
     def config(self):
@@ -88,6 +89,9 @@ class RunConfig:
             if self.dataset == 'imagenet':
                 from data_providers.imagenet import ImagenetDataProvider
                 self._data_provider = ImagenetDataProvider(**self.data_config)
+            elif self.dataset == 'cifar10':
+                from data_providers.cifar10 import Cifar10DataProvider
+                self._data_provider = Cifar10DataProvider(**self.data_config)
             else:
                 raise ValueError('do not support: %s' % self.dataset)
         return self._data_provider
@@ -186,8 +190,10 @@ class RunManager:
             self.net.to(self.device)
             cudnn.benchmark = True
         else:
-            raise ValueError
-            # self.device = torch.device('cpu')
+            # raise ValueError
+            self.device = torch.device('cpu')
+            self.net = torch.nn.DataParallel(self.net)
+            self.net.to(self.device)
 
         # net info
         self.print_net_info(measure_latency)
