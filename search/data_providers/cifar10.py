@@ -90,7 +90,7 @@ class Cifar10DataProvider(DataProvider):
 
     @property
     def valid_path(self):
-        return os.path.join(self.save_path, 'val')
+        return os.path.join(self.save_path, 'test')
 
     @property
     def normalize(self):
