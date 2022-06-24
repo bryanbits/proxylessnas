@@ -473,7 +473,7 @@ class ArchSearchRunManager:
         # switch to train mode
         self.run_manager.net.train()
         # sample a batch of data from validation set
-        images, labels = self.run_manager.run_config.test_next_batch
+        images, labels = self.run_manager.run_config.valid_next_batch
         images, labels = images.to(self.run_manager.device), labels.to(self.run_manager.device)
         # sample nets and get their validation accuracy, latency, etc
         grad_buffer = []
@@ -548,7 +548,7 @@ class ArchSearchRunManager:
         MixedEdge.MODE = self.arch_search_config.binary_mode
         time1 = time.time()  # time
         # sample a batch of data from validation set
-        images, labels = self.run_manager.run_config.test_next_batch
+        images, labels = self.run_manager.run_config.valid_next_batch
         images, labels = images.to(self.run_manager.device), labels.to(self.run_manager.device)
         time2 = time.time()  # time
         # compute output
