@@ -37,16 +37,16 @@ class Cifar10DataProvider(DataProvider):
 
             self.train = torch.utils.data.DataLoader(
                 train_dataset, batch_size=train_batch_size, sampler=train_sampler,
-                num_workers=n_worker, pin_memory=True,
+                num_workers=n_worker, pin_memory=True, drop_last=True
             )
             self.valid = torch.utils.data.DataLoader(
                 valid_dataset, batch_size=test_batch_size, sampler=valid_sampler,
-                num_workers=n_worker, pin_memory=True,
+                num_workers=n_worker, pin_memory=True, drop_last=True
             )
         else:
             self.train = torch.utils.data.DataLoader(
                 train_dataset, batch_size=train_batch_size, shuffle=True,
-                num_workers=n_worker, pin_memory=True,
+                num_workers=n_worker, pin_memory=True, drop_last=True
             )
             self.valid = None
 
@@ -56,7 +56,7 @@ class Cifar10DataProvider(DataProvider):
                 transforms.CenterCrop(self.image_size),
                 transforms.ToTensor(),
                 self.normalize,
-            ])), batch_size=test_batch_size, shuffle=False, num_workers=n_worker, pin_memory=True,
+            ])), batch_size=test_batch_size, shuffle=False, num_workers=n_worker, pin_memory=True, drop_last=True
         )
 
         if self.valid is None:
