@@ -537,8 +537,6 @@ class ArchSearchRunManager:
     def gradient_step(self):
         assert isinstance(self.arch_search_config, GradientArchSearchConfig)
         
-        print("data_batch does not exist: " + str(self.arch_search_config.data_batch is None))
-        
         if self.arch_search_config.data_batch is None:
             self.run_manager.run_config.valid_loader.batch_sampler.batch_size = \
                 self.run_manager.run_config.train_batch_size
