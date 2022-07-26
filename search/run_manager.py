@@ -580,7 +580,7 @@ class RunManager:
                         'Time after accuracy updates {accuracy_update_time.val:.3f} ({accuracy_update_time.avg:.3f})\t' \
                         'Time after computation of output {output_computation_time.val:.3f} ({output_computation_time.val:.3f})\t' \
                         'Time after backpropagation {backprop_time.val:.3f} ({backprop_time.avg:.3f})'. \
-                format(epoch_ + 1, i, nBatch - 1, batch_time=batch_time, data_time=data_time, losses=losses, top1=top1)
+                format(epoch_ + 1, i, nBatch - 1, batch_time=batch_time, data_time=data_time, losses=losses, top1=top1, lr_adjustment_time=lr_adjustment_time, output_computation_time=output_computation_time, accuracy_update_time=accuracy_computation_time, backprop_time=backprop_time)
             
             if print_top5:
                 batch_log += '\tTop-5 acc {top5.val:.3f} ({top5.avg:.3f})'.format(top5=top5)
