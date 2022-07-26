@@ -428,7 +428,7 @@ class ArchSearchRunManager:
                                 'Top-5 acc {top5.val:.3f} ({top5.avg:.3f})\tlr {lr:.5f}\t' \
                                 'Time after lr update {lr_adjustment_time.val:.3f} ({lr_adjustment_time.avg:.3f})\t' \
                                 'Time after accuracy updates {accuracy_update_time.val:.3f} ({accuracy_update_time.avg:.3f})\t' \
-                                'Time after backpropagation {backprop_time.val:.3f} ({backprop_time.avg:.3f})\t' \ 
+                                'Time after backpropagation {backprop_time.val:.3f} ({backprop_time.avg:.3f})\t'. \ 
                         format(epoch + 1, i, nBatch - 1, batch_time=batch_time, data_time=data_time,
                                losses=losses, entropy=entropy, top1=top1, top5=top5, lr=lr)
                     self.run_manager.write_log(batch_log, 'train')
