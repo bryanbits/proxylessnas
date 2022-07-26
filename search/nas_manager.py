@@ -349,6 +349,9 @@ class ArchSearchRunManager:
             top1 = AverageMeter()
             top5 = AverageMeter()
             entropy = AverageMeter()
+            lr_adjustment_time = AverageMeter()
+            accuracy_update_time = AverageMeter()
+            backprop_time = AverageMeter()
             # switch to train mode
             self.run_manager.net.train()
 
@@ -359,6 +362,7 @@ class ArchSearchRunManager:
                 lr = self.run_manager.run_config.adjust_learning_rate(
                     self.run_manager.optimizer, epoch, batch=i, nBatch=nBatch
                 )
+                lr_adjustment_time.update(time.time() - end)
                 # network entropy
                 net_entropy = self.net.entropy()
                 entropy.update(net_entropy.data.item() / arch_param_num, 1)
@@ -381,9 +385,11 @@ class ArchSearchRunManager:
                     losses.update(loss, images.size(0))
                     top1.update(acc1[0], images.size(0))
                     top5.update(acc5[0], images.size(0))
+                    accuracy_update_time.update(time.time() - end)
                     # compute gradient and do SGD step
                     self.run_manager.net.zero_grad()  # zero grads of weight_param, arch_param & binary_param
                     loss.backward()
+                    backprop_time.update(time.time() - end)
                     self.run_manager.optimizer.step()  # update weight parameters
                     # unused modules back
                     self.net.unused_modules_back()
@@ -419,7 +425,10 @@ class ArchSearchRunManager:
                                 'Loss {losses.val:.4f} ({losses.avg:.4f})\t' \
                                 'Entropy {entropy.val:.5f} ({entropy.avg:.5f})\t' \
                                 'Top-1 acc {top1.val:.3f} ({top1.avg:.3f})\t' \
-                                'Top-5 acc {top5.val:.3f} ({top5.avg:.3f})\tlr {lr:.5f}'. \
+                                'Top-5 acc {top5.val:.3f} ({top5.avg:.3f})\tlr {lr:.5f}\t' \
+                                'Time after lr update {lr_adjustment_time.val:.3f} ({lr_adjustment_time.avg:.3f})\t' \
+                                'Time after accuracy updates {accuracy_update_time.val:.3f} ({accuracy_update_time.avg:.3f})\t' \
+                                'Time after backpropagation {backprop_time.val:.3f} ({backprop_time.avg:.3f})\t' \ 
                         format(epoch + 1, i, nBatch - 1, batch_time=batch_time, data_time=data_time,
                                losses=losses, entropy=entropy, top1=top1, top5=top5, lr=lr)
                     self.run_manager.write_log(batch_log, 'train')
