@@ -525,6 +525,7 @@ class RunManager:
         output_computation_time = AverageMeter()
         accuracy_update_time = AverageMeter()
         backprop_time = AverageMeter()
+        conversion_time = AverageMeter()
 
         # switch to train mode
         self.net.train()
@@ -535,27 +536,32 @@ class RunManager:
             new_lr = adjust_lr_func(i)
             lr_adjustment_time.update(time.time() - end)
             
+            time_before_conversion = time.time()
             images, labels = images.to(self.device), labels.to(self.device)
+            conversion_time.update(time.time() - end)
 
             # compute output
+            time_before_output = time.time()
             output = self.net(images)
             if self.run_config.label_smoothing > 0:
                 loss = cross_entropy_with_label_smoothing(output, labels, self.run_config.label_smoothing)
             else:
                 loss = self.criterion(output, labels)
             
-            output_computation_time.update(time.time() - end)
+            output_computation_time.update(time.time() - time_before_output)
             
             # measure accuracy and record loss
+            time_before_acc = time.time()
             acc1, acc5 = accuracy(output, labels, topk=(1, 5))
             losses.update(loss, images.size(0))
             top1.update(acc1[0], images.size(0))
             top5.update(acc5[0], images.size(0))
-            accuracy_update_time.update(time.time() - end)
+            accuracy_update_time.update(time.time() - time_before_acc)
             # compute gradient and do SGD step
+            time_before_backprop = time.time()
             self.net.zero_grad()  # or self.optimizer.zero_grad()
             loss.backward()
-            backprop_time.update(time.time() - end)
+            backprop_time.update(time.time() - time_before_backpro)
             self.optimizer.step()
 
             # measure elapsed time
