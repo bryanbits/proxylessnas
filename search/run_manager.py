@@ -575,11 +575,11 @@ class RunManager:
                         'Time {batch_time.val:.3f} ({batch_time.avg:.3f})\t' \
                         'Data {data_time.val:.3f} ({data_time.avg:.3f})\t' \
                         'Loss {losses.val:.4f} ({losses.avg:.4f})\t' \
-                        'Top-1 acc {top1.val:.3f} ({top1.avg:.3f})'\
+                        'Top-1 acc {top1.val:.3f} ({top1.avg:.3f})\t' \
                         'Time after lr update {lr_adjustment_time.val:.3f} ({lr_adjustment_time.avg:.3f})\t' \
                         'Time after accuracy updates {accuracy_update_time.val:.3f} ({accuracy_update_time.avg:.3f})\t' \
                         'Time after computation of output {output_computation_time.val:.3f} ({output_computation_time.val:.3f})\t' \
-                        'Time after backpropagation {backprop_time.val:.3f} ({backprop_time.avg:.3f})\t'. \ 
+                        'Time after backpropagation {backprop_time.val:.3f} ({backprop_time.avg:.3f})'. \
                 format(epoch_ + 1, i, nBatch - 1,
                        batch_time=batch_time, data_time=data_time, losses=losses, top1=top1)
             if print_top5:
