@@ -381,15 +381,17 @@ class ArchSearchRunManager:
                     else:
                         loss = self.run_manager.criterion(output, labels)
                     # measure accuracy and record loss
+                    time_before_accuracy = time.time()
                     acc1, acc5 = accuracy(output, labels, topk=(1, 5))
                     losses.update(loss, images.size(0))
                     top1.update(acc1[0], images.size(0))
                     top5.update(acc5[0], images.size(0))
-                    accuracy_update_time.update(time.time() - end)
+                    accuracy_update_time.update(time.time() - time_before_accuracy)
                     # compute gradient and do SGD step
+                    time_before_backprop = time.time()
                     self.run_manager.net.zero_grad()  # zero grads of weight_param, arch_param & binary_param
                     loss.backward()
-                    backprop_time.update(time.time() - end)
+                    backprop_time.update(time.time() - time_before_backprop)
                     self.run_manager.optimizer.step()  # update weight parameters
                     # unused modules back
                     self.net.unused_modules_back()
