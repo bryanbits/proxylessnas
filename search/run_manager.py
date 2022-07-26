@@ -521,7 +521,10 @@ class RunManager:
         losses = AverageMeter()
         top1 = AverageMeter()
         top5 = AverageMeter()
-        
+        lr_adjustment_time = AverageMeter()
+        output_computation_time = AverageMeter()
+        accuracy_update_time = AverageMeter()
+        backprop_time = AverageMeter()
 
         # switch to train mode
         self.net.train()
@@ -530,6 +533,8 @@ class RunManager:
         for i, (images, labels) in enumerate(self.run_config.train_loader):
             data_time.update(time.time() - end)
             new_lr = adjust_lr_func(i)
+            lr_adjustment_time.update(time.time() - end)
+            
             images, labels = images.to(self.device), labels.to(self.device)
 
             # compute output
@@ -538,16 +543,19 @@ class RunManager:
                 loss = cross_entropy_with_label_smoothing(output, labels, self.run_config.label_smoothing)
             else:
                 loss = self.criterion(output, labels)
-
+            
+            output_computation_time.update(time.time() - end)
+            
             # measure accuracy and record loss
             acc1, acc5 = accuracy(output, labels, topk=(1, 5))
             losses.update(loss, images.size(0))
             top1.update(acc1[0], images.size(0))
             top5.update(acc5[0], images.size(0))
-
+            accuracy_update_time = AverageMeter()
             # compute gradient and do SGD step
             self.net.zero_grad()  # or self.optimizer.zero_grad()
             loss.backward()
+            backprop_time.update(time.time() - end)
             self.optimizer.step()
 
             # measure elapsed time
@@ -570,6 +578,7 @@ class RunManager:
                         'Top-1 acc {top1.val:.3f} ({top1.avg:.3f})'\
                         'Time after lr update {lr_adjustment_time.val:.3f} ({lr_adjustment_time.avg:.3f})\t' \
                         'Time after accuracy updates {accuracy_update_time.val:.3f} ({accuracy_update_time.avg:.3f})\t' \
+                        'Time after computation of output {output_computation_time.val:.3f} ({output_computation_time.val:.3f})\t' \
                         'Time after backpropagation {backprop_time.val:.3f} ({backprop_time.avg:.3f})\t'. \ 
                 format(epoch_ + 1, i, nBatch - 1,
                        batch_time=batch_time, data_time=data_time, losses=losses, top1=top1)
