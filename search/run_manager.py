@@ -551,7 +551,7 @@ class RunManager:
             losses.update(loss, images.size(0))
             top1.update(acc1[0], images.size(0))
             top5.update(acc5[0], images.size(0))
-            accuracy_update_time = AverageMeter()
+            accuracy_update_time.update(time.time() - end)
             # compute gradient and do SGD step
             self.net.zero_grad()  # or self.optimizer.zero_grad()
             loss.backward()
