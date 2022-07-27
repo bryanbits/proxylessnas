@@ -352,6 +352,13 @@ class ArchSearchRunManager:
             lr_adjustment_time = AverageMeter()
             accuracy_update_time = AverageMeter()
             backprop_time = AverageMeter()
+            entropy_time = AverageMeter()
+            train_time = AverageMeter()
+            update_arch_time = AverageMeter()
+            tensor_conversion_time = AverageMeter()
+            speedup_processes_time = AverageMeter()
+            forward_time = AverageMeter()
+            loss_time = AverageMeter()
             # switch to train mode
             self.run_manager.net.train()
 
@@ -359,27 +366,39 @@ class ArchSearchRunManager:
             for i, (images, labels) in enumerate(data_loader):
                 data_time.update(time.time() - end)
                 # lr
+                lr_start = time.time()
                 lr = self.run_manager.run_config.adjust_learning_rate(
                     self.run_manager.optimizer, epoch, batch=i, nBatch=nBatch
                 )
-                lr_adjustment_time.update(time.time() - end)
+                lr_adjustment_time.update(time.time() - lr_start)
                 # network entropy
+                entropy_start = time.time()
                 net_entropy = self.net.entropy()
                 entropy.update(net_entropy.data.item() / arch_param_num, 1)
+                entropy_time.update(time.time - entropy_start)
                 # train weight parameters if not fix_net_weights
                 if not fix_net_weights:
+                    train_start = time.time()
                     images, labels = images.to(self.run_manager.device), labels.to(self.run_manager.device)
+                    tensor_conversion_time.update(time.time() - train_start)
                     # compute output
+                    speedup_start = time.time()
                     self.net.reset_binary_gates()  # random sample binary gates
                     self.net.unused_modules_off()  # remove unused module for speedup
+                    speedup_processes_time.update(time.time() - speedup_start)
+
+                    forward_start = time.time()
                     output = self.run_manager.net(images)  # forward (DataParallel)
+                    forward_time.update(time.time() - forward_start)
                     # loss
+                    loss_start = time.time()
                     if self.run_manager.run_config.label_smoothing > 0:
                         loss = cross_entropy_with_label_smoothing(
                             output, labels, self.run_manager.run_config.label_smoothing
                         )
                     else:
                         loss = self.run_manager.criterion(output, labels)
+                    loss_time.update(time.time() - loss_start)
                     # measure accuracy and record loss
                     time_before_accuracy = time.time()
                     acc1, acc5 = accuracy(output, labels, topk=(1, 5))
@@ -391,12 +410,14 @@ class ArchSearchRunManager:
                     time_before_backprop = time.time()
                     self.run_manager.net.zero_grad()  # zero grads of weight_param, arch_param & binary_param
                     loss.backward()
-                    backprop_time.update(time.time() - time_before_backprop)
                     self.run_manager.optimizer.step()  # update weight parameters
+                    backprop_time.update(time.time() - time_before_backprop)
                     # unused modules back
                     self.net.unused_modules_back()
+                    train_time.update(time.time() - train_start)
                 # skip architecture parameter updates in the first epoch
                 if epoch > 0:
+                    update_arch_time_start = time.time()
                     # update architecture parameters according to update_schedule
                     for j in range(update_schedule.get(i, 0)):
                         start_time = time.time()
@@ -416,6 +437,7 @@ class ArchSearchRunManager:
                             self.write_log(log_str, prefix='gradient', should_print=False)
                         else:
                             raise ValueError('do not support: %s' % type(self.arch_search_config))
+                    update_arch_time.update(time.time() - update_arch_time_start)
                 # measure elapsed time
                 batch_time.update(time.time() - end)
                 end = time.time()
@@ -427,11 +449,36 @@ class ArchSearchRunManager:
                                 'Loss {losses.val:.4f} ({losses.avg:.4f})\t' \
                                 'Entropy {entropy.val:.5f} ({entropy.avg:.5f})\t' \
                                 'Top-1 acc {top1.val:.3f} ({top1.avg:.3f})\t' \
-                                'Top-5 acc {top5.val:.3f} ({top5.avg:.3f})\tlr {lr:.5f}\t' \
-                                'Time after lr update {lr_adjustment_time.val:.3f} ({lr_adjustment_time.avg:.3f})\t' \
-                                'Time after accuracy updates {accuracy_update_time.val:.3f} ({accuracy_update_time.avg:.3f})\t' \
-                                'Time after backpropagation {backprop_time.val:.3f} ({backprop_time.avg:.3f})\t'. \
-                        format(epoch + 1, i, nBatch - 1, batch_time=batch_time, data_time=data_time, losses=losses, entropy=entropy, top1=top1, top5=top5, lr=lr, lr_adjustment_time=lr_adjustment_time, accuracy_update_time=accuracy_update_time, backprop_time=backprop_time)
+                                'Top-5 acc {top5.val:.3f} ({top5.avg:.3f})\t' \
+                                'lr {lr:.5f}\t' \
+                                'Time for entropy adjust {entropy_time.val:.3f} ({entropy_time.avg:.3f})\t' \
+                                'Time for full train {train_time.val:.3f} ({train_time.avg:.3f})\t' \
+                                'Time for lr update {lr_adjustment_time.val:.3f} ({lr_adjustment_time.avg:.3f})\t' \
+                                'Time for tensor conversion {tensor_conversion_time.val:.3f} ({tensor_conversion_time.avg:.3f})' \
+                                'Time for speedup processes {.val:.3f} ({.avg:.3f})' \
+                                'Time for forward prop {foward_time.val:.3f} ({forward_time.avg:.3f})' \
+                                'Time for loss calculation {loss_time.val:.3f} ({loss_time.avg:.3f})' \
+                                'Time for acc updates {accuracy_update_time.val:.3f} ({accuracy_update_time.avg:.3f})\t' \
+                                'Time for backprop {backprop_time.val:.3f} ({backprop_time.avg:.3f})\t' \
+                                'Time for arch updates {update_arch_time.val:.3f} ({update_arch_time.avg:.3f})'. \
+                        format(epoch + 1, i, nBatch - 1, 
+                        batch_time=batch_time, 
+                        data_time=data_time, 
+                        losses=losses, 
+                        entropy=entropy, 
+                        top1=top1, 
+                        top5=top5, 
+                        lr=lr, 
+                        entropy_time=entropy_time, 
+                        train_time=train_time, 
+                        lr_adjustment_time=lr_adjustment_time, 
+                        tensor_conversion_time=tensor_conversion_time, 
+                        speedup_processes_time=speedup_processes_time, 
+                        loss_time=loss_time, 
+                        accuracy_update_time=accuracy_update_time, 
+                        backprop_time=backprop_time, 
+                        update_arch_time=update_arch_time, 
+                        )
                     self.run_manager.write_log(batch_log, 'train')
 
             # print current network architecture
