@@ -477,6 +477,7 @@ class ArchSearchRunManager:
                             lr_adjustment_time=lr_adjustment_time, 
                             tensor_conversion_time=tensor_conversion_time, 
                             speedup_processes_time=speedup_processes_time, 
+                            forward_time=forward_time, 
                             loss_time=loss_time, 
                             accuracy_update_time=accuracy_update_time, 
                             backprop_time=backprop_time, 
