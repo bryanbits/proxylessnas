@@ -443,7 +443,7 @@ class ArchSearchRunManager:
                 end = time.time()
                 # training log
                 if i % self.run_manager.run_config.print_frequency == 0 or i + 1 == nBatch:
-                    batch_log = 'Train [{0}][{1}/{2}]\t' \
+                    batch_log = 'Train [{curr_epoch}][{curr_batch}/{total_batches}]\t' \
                                 'Time {batch_time.val:.3f} ({batch_time.avg:.3f})\t' \
                                 'Data Time {data_time.val:.3f} ({data_time.avg:.3f})\t' \
                                 'Loss {losses.val:.4f} ({losses.avg:.4f})\t' \
@@ -454,31 +454,14 @@ class ArchSearchRunManager:
                                 'Time for entropy adjust {entropy_time.val:.3f} ({entropy_time.avg:.3f})\t' \
                                 'Time for full train {train_time.val:.3f} ({train_time.avg:.3f})\t' \
                                 'Time for lr update {lr_adjustment_time.val:.3f} ({lr_adjustment_time.avg:.3f})\t' \
-                                'Time for tensor conversion {tensor_conversion_time.val:.3f} ({tensor_conversion_time.avg:.3f})' \
-                                'Time for speedup processes {.val:.3f} ({.avg:.3f})' \
-                                'Time for forward prop {foward_time.val:.3f} ({forward_time.avg:.3f})' \
-                                'Time for loss calculation {loss_time.val:.3f} ({loss_time.avg:.3f})' \
+                                'Time for tensor conversion {tensor_conversion_time.val:.3f} ({tensor_conversion_time.avg:.3f})\t' \
+                                'Time for speedup processes {.val:.3f} ({.avg:.3f})\t' \
+                                'Time for forward prop {foward_time.val:.3f} ({forward_time.avg:.3f})\t' \
+                                'Time for loss calculation {loss_time.val:.3f} ({loss_time.avg:.3f})\t' \
                                 'Time for acc updates {accuracy_update_time.val:.3f} ({accuracy_update_time.avg:.3f})\t' \
                                 'Time for backprop {backprop_time.val:.3f} ({backprop_time.avg:.3f})\t' \
                                 'Time for arch updates {update_arch_time.val:.3f} ({update_arch_time.avg:.3f})'. \
-                        format(epoch + 1, i, nBatch - 1, 
-                        batch_time=batch_time, 
-                        data_time=data_time, 
-                        losses=losses, 
-                        entropy=entropy, 
-                        top1=top1, 
-                        top5=top5, 
-                        lr=lr, 
-                        entropy_time=entropy_time, 
-                        train_time=train_time, 
-                        lr_adjustment_time=lr_adjustment_time, 
-                        tensor_conversion_time=tensor_conversion_time, 
-                        speedup_processes_time=speedup_processes_time, 
-                        loss_time=loss_time, 
-                        accuracy_update_time=accuracy_update_time, 
-                        backprop_time=backprop_time, 
-                        update_arch_time=update_arch_time, 
-                        )
+                        format(curr_epoch=epoch+1, curr_batch=i, total_batches=nBatch - 1, batch_time=batch_time, data_time=data_time, losses=losses, entropy=entropy, top1=top1, top5=top5, lr=lr, entropy_time=entropy_time, train_time=train_time, lr_adjustment_time=lr_adjustment_time, tensor_conversion_time=tensor_conversion_time, speedup_processes_time=speedup_processes_time, loss_time=loss_time, accuracy_update_time=accuracy_update_time, backprop_time=backprop_time, update_arch_time=update_arch_time, )
                     self.run_manager.write_log(batch_log, 'train')
 
             # print current network architecture
