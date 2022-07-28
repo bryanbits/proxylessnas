@@ -456,7 +456,7 @@ class ArchSearchRunManager:
                                 'Time for lr update {lr_adjustment_time.val:.3f} ({lr_adjustment_time.avg:.3f})\t' \
                                 'Time for tensor conversion {tensor_conversion_time.val:.3f} ({tensor_conversion_time.avg:.3f})\t' \
                                 'Time for speedup processes {speedup_processes_time.val:.3f} ({speedup_processes_time.avg:.3f})\t' \
-                                'Time for forward prop {foward_time.val:.3f} ({forward_time.avg:.3f})\t' \
+                                'Time for forward prop {forward_time.val:.3f} ({forward_time.avg:.3f})\t' \
                                 'Time for loss calculation {loss_time.val:.3f} ({loss_time.avg:.3f})\t' \
                                 'Time for acc updates {accuracy_update_time.val:.3f} ({accuracy_update_time.avg:.3f})\t' \
                                 'Time for backprop {backprop_time.val:.3f} ({backprop_time.avg:.3f})\t' \
