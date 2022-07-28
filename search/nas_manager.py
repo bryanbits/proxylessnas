@@ -461,7 +461,7 @@ class ArchSearchRunManager:
                                 'Time for acc updates {accuracy_update_time.val:.3f} ({accuracy_update_time.avg:.3f})\t' \
                                 'Time for backprop {backprop_time.val:.3f} ({backprop_time.avg:.3f})\t' \
                                 'Time for arch updates {update_arch_time.val:.3f} ({update_arch_time.avg:.3f})'. \
-                        format(curr_epoch=epoch+1, curr_batch=i, total_batches=nBatch - 1, batch_time=batch_time, data_time=data_time, losses=losses, entropy=entropy, top1=top1, top5=top5, lr=lr, entropy_time=entropy_time, train_time=train_time, lr_adjustment_time=lr_adjustment_time, tensor_conversion_time=tensor_conversion_time, speedup_processes_time=speedup_processes_time, loss_time=loss_time, accuracy_update_time=accuracy_update_time, backprop_time=backprop_time, update_arch_time=update_arch_time, )
+                        format(curr_epoch=epoch+1, curr_batch=i, total_batches=nBatch - 1, batch_time=batch_time, data_time=data_time, losses=losses, entropy=entropy, top1=top1, top5=top5, lr=lr, entropy_time=entropy_time, train_time=train_time, lr_adjustment_time=lr_adjustment_time, tensor_conversion_time=tensor_conversion_time, speedup_processes_time=speedup_processes_time, loss_time=loss_time, accuracy_update_time=accuracy_update_time, backprop_time=backprop_time, update_arch_time=update_arch_time)
                     self.run_manager.write_log(batch_log, 'train')
 
             # print current network architecture
