@@ -375,7 +375,7 @@ class ArchSearchRunManager:
                 entropy_start = time.time()
                 net_entropy = self.net.entropy()
                 entropy.update(net_entropy.data.item() / arch_param_num, 1)
-                entropy_time.update(time.time - entropy_start)
+                entropy_time.update(time.time() - entropy_start)
                 # train weight parameters if not fix_net_weights
                 if not fix_net_weights:
                     train_start = time.time()
